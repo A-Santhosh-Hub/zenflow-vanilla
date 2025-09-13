@@ -172,6 +172,23 @@ export const ProjectModal = ({ project, isOpen, onClose, onSave, onDelete }: Pro
     return <File className="w-4 h-4" />;
   };
 
+  const handleFilePreview = (file: any) => {
+    if (file.type.startsWith('image/')) {
+      // For images, open in new tab
+      window.open(file.url, '_blank');
+    } else if (file.type.includes('pdf')) {
+      // For PDFs, open in new tab with proper PDF viewer
+      window.open(file.url, '_blank');
+    } else if (file.type.includes('document') || file.type.includes('word') || file.type.includes('sheet') || file.type.includes('presentation') || file.name.match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/i)) {
+      // For Office documents, use Google Docs Viewer
+      const encodedUrl = encodeURIComponent(file.url);
+      window.open(`https://docs.google.com/gview?url=${encodedUrl}&embedded=true`, '_blank');
+    } else {
+      // For other file types, try to open directly
+      window.open(file.url, '_blank');
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <div className="bg-card w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col">
@@ -365,7 +382,7 @@ export const ProjectModal = ({ project, isOpen, onClose, onSave, onDelete }: Pro
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => window.open(file.url, '_blank')}
+                              onClick={() => handleFilePreview(file)}
                             >
                               <Eye className="w-3 h-3 mr-1" />
                               Preview
