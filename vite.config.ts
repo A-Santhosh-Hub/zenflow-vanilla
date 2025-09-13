@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     allowedHosts: [
-      'san-flow-work.onrender.com' // ✅ Add this line to allow your Render domain
+      'all' // ✅ Add this line to allow your Render domain
     ]
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
