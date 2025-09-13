@@ -32,7 +32,8 @@ const priorityConfig = {
 export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString('en-IN', { 
+      timeZone: 'Asia/Kolkata',
       month: 'short', 
       day: 'numeric',
       year: 'numeric'

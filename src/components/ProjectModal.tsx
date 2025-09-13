@@ -94,6 +94,13 @@ export const ProjectModal = ({ project, isOpen, onClose, onSave, onDelete }: Pro
     return editedProject.lineItems.reduce((sum, item) => sum + item.cost, 0);
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+    }).format(amount);
+  };
+
   const handlePrintBill = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -141,14 +148,14 @@ export const ProjectModal = ({ project, isOpen, onClose, onSave, onDelete }: Pro
               ${editedProject.lineItems.map(item => `
                 <tr>
                   <td>${item.description}</td>
-                  <td>$${item.cost.toLocaleString()}</td>
+                  <td>${formatCurrency(item.cost)}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
           
           <div class="total">
-            Total: $${getTotalCost().toLocaleString()}
+            Total: ${formatCurrency(getTotalCost())}
           </div>
         </body>
       </html>
@@ -294,10 +301,24 @@ export const ProjectModal = ({ project, isOpen, onClose, onSave, onDelete }: Pro
                 {/* Timestamps */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                   <div>
-                    <strong>Created:</strong> {new Date(editedProject.createdAt).toLocaleString()}
+                    <strong>Created:</strong> {new Date(editedProject.createdAt).toLocaleString('en-IN', {
+                      timeZone: 'Asia/Kolkata',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </div>
                   <div>
-                    <strong>Last Updated:</strong> {new Date(editedProject.updatedAt).toLocaleString()}
+                    <strong>Last Updated:</strong> {new Date(editedProject.updatedAt).toLocaleString('en-IN', {
+                      timeZone: 'Asia/Kolkata',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </div>
                 </div>
               </TabsContent>
@@ -404,13 +425,16 @@ export const ProjectModal = ({ project, isOpen, onClose, onSave, onDelete }: Pro
                             onChange={(e) => handleUpdateLineItem(item.id, 'description', e.target.value)}
                             className="flex-1"
                           />
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            value={item.cost}
-                            onChange={(e) => handleUpdateLineItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
-                            className="w-24"
-                          />
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">₹</span>
+                            <Input
+                              type="number"
+                              placeholder="0"
+                              value={item.cost}
+                              onChange={(e) => handleUpdateLineItem(item.id, 'cost', parseFloat(e.target.value) || 0)}
+                              className="w-28 pl-8"
+                            />
+                          </div>
                           <Button 
                             size="sm" 
                             variant="outline"
@@ -429,7 +453,7 @@ export const ProjectModal = ({ project, isOpen, onClose, onSave, onDelete }: Pro
                     <div className="flex justify-end">
                       <div className="text-right">
                         <div className="text-lg font-semibold">
-                          Total: ${getTotalCost().toLocaleString()}
+                          Total: {formatCurrency(getTotalCost())}
                         </div>
                       </div>
                     </div>
