@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Plus, FileText, Calendar, Flag } from 'lucide-react';
+import { Plus, FileText, Calendar, Flag, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProjectCard } from './ProjectCard';
 import { ProjectModal } from './ProjectModal';
 
@@ -49,6 +50,7 @@ export const KanbanBoard = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>('all');
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -195,12 +197,27 @@ export const KanbanBoard = () => {
     setSelectedProject(null);
   };
 
+  // Get all unique companies for filter
+  const getAllCompanies = () => {
+    const allProjects = Object.values(projects).flat();
+    const companies = [...new Set(allProjects.map(p => p.company).filter(company => company.trim() !== ''))];
+    return companies.sort();
+  };
+
+  // Filter projects based on selected company
+  const getFilteredProjects = (columnProjects: Project[]) => {
+    if (selectedCompanyFilter === 'all') {
+      return columnProjects;
+    }
+    return columnProjects.filter(project => project.company === selectedCompanyFilter);
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-semibold text-foreground mb-2">
                 Project Dashboard
@@ -217,6 +234,27 @@ export const KanbanBoard = () => {
               New Project
             </Button>
           </div>
+          
+          {/* Filter Section */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Filter by Company:</span>
+            </div>
+            <Select value={selectedCompanyFilter} onValueChange={setSelectedCompanyFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {getAllCompanies().map(company => (
+                  <SelectItem key={company} value={company}>
+                    {company}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Kanban Board */}
@@ -230,7 +268,7 @@ export const KanbanBoard = () => {
                       {column.title}
                     </h3>
                     <span className="bg-white/60 text-xs px-2 py-1 rounded-full font-medium">
-                      {projects[column.id].length}
+                      {getFilteredProjects(projects[column.id]).length}
                     </span>
                   </div>
                 </div>
@@ -244,7 +282,7 @@ export const KanbanBoard = () => {
                         snapshot.isDraggingOver ? 'bg-primary-light/50' : 'bg-transparent'
                       }`}
                     >
-                      {projects[column.id].map((project, index) => (
+                      {getFilteredProjects(projects[column.id]).map((project, index) => (
                         <Draggable 
                           key={project.id} 
                           draggableId={project.id} 
